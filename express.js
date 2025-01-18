@@ -1,6 +1,7 @@
 import express from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
@@ -8,6 +9,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  throw new Error("API key is required");
+}
+
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
@@ -23,13 +28,22 @@ const generationConfig = {
 };
 
 app.use(express.json());
+app.use(cors());
 
 app.post("/api/generate", async (req, res) => {
   try {
+    if (!req.is("application/json")) {
+      return res.status(400).json({ error: "Invalid content type" });
+    }
+
     const { input } = req.body;
 
     if (!input) {
       return res.status(400).json({ error: "Input message is required" });
+    }
+
+    if (typeof input !== "string" || input.trim() === "") {
+      return res.status(400).json({ error: "Input must be a non-empty string" });
     }
 
     const chatSession = await model.startChat({
