@@ -4,6 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "node express.js",
+    "dev": "nodemon express.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
